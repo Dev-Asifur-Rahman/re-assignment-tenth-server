@@ -24,36 +24,43 @@ async function run(app) {
     const collection = TenthDB.collection("collection");
 
     // insert a data
-    app.post("/postdata", async (req, res) => {
+    app.post("/addreview", async (req, res) => {
       const obj = req.body;
       const result = await collection.insertOne(obj);
       res.send(result)
     });
 
     // get all game data 
-    app.get("/alldata", async (req, res) => {
+    app.get("/reviews", async (req, res) => {
       const allDocs = collection.find();
       const result = await allDocs.toArray();
       res.send(result);
     });
 
     // find one data 
-    app.get('/singledata/:id',async(req,res)=>{
+    app.get('/review/:id',async(req,res)=>{
         const id = req.params.id
         const query = {_id : new ObjectId(id)}
         const result = await collection.findOne(query)
         res.send(result)
-
     })
 
-    // delete 
-    // app.delete('/doc/:id',async(req,res)=>{
-    //   const id = req.params.id
-    //   const query = {_id: new ObjectId(id)}
+    app.get('/myreviews',async(req,res)=>{
+      const email = req.query.email
+      const query = {email: email}
+      const cursor =  collection.find(query)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
 
-    //   const result = await collection.deleteOne(query)
-    //   res.send(result)
-    // })
+    delete 
+    app.delete('/delete/:id',async(req,res)=>{
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+
+      const result = await collection.deleteOne(query)
+      res.send(result)
+    })
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
