@@ -23,20 +23,28 @@ async function run(app) {
     // collection
     const collection = TenthDB.collection("collection");
 
-    // insert operation
-    // app.post("/doc/:data", async (req, res) => {
-    //   const data = req.params.data;
-    //   const obj = req.body;
-    //   const result = await collection.insertOne(obj);
-    //   res.send(result)
-    // });
+    // insert a data
+    app.post("/postdata", async (req, res) => {
+      const obj = req.body;
+      const result = await collection.insertOne(obj);
+      res.send(result)
+    });
 
-    // post
-    // app.get("/doc", async (req, res) => {
-    //   const allDocs = collection.find();
-    //   const result = await allDocs.toArray();
-    //   res.send(result);
-    // });
+    // get all game data 
+    app.get("/alldata", async (req, res) => {
+      const allDocs = collection.find();
+      const result = await allDocs.toArray();
+      res.send(result);
+    });
+
+    // find one data 
+    app.get('/singledata/:id',async(req,res)=>{
+        const id = req.params.id
+        const query = {_id : new ObjectId(id)}
+        const result = await collection.findOne(query)
+        res.send(result)
+
+    })
 
     // delete 
     // app.delete('/doc/:id',async(req,res)=>{
