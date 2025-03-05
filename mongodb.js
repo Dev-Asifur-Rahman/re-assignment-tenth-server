@@ -22,6 +22,7 @@ async function run(app) {
 
     // collection
     const collection = TenthDB.collection("collection");
+    const watchlist = TenthDB.collection("watchlist")
 
     // insert a data
     app.post("/addreview", async (req, res) => {
@@ -29,6 +30,14 @@ async function run(app) {
       const result = await collection.insertOne(obj);
       res.send(result);
     });
+
+    // insert a watchlist data 
+    app.post('/addwatchlist',async(req,res)=>{
+      const obj = req.body
+      console.log(obj)
+      // const result = await watchlist.insertOne(obj)
+      // res.send(result)
+    })
 
     // get all game data
     app.get("/reviews", async (req, res) => {
@@ -45,6 +54,7 @@ async function run(app) {
       res.send(result);
     });
 
+    // get data by email 
     app.get("/myreviews", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
@@ -52,6 +62,15 @@ async function run(app) {
       const result = await cursor.toArray();
       res.send(result);
     });
+
+    // get watchlist by email 
+    app.get('/mywatchlist',async(req,res)=>{
+      const email = req.query.email
+      const query = {email : email}
+      const cursor = watchlist.find(query)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
 
     app.put("/updatereview/:id", async (req, res) => {
       const id = req.params.id;
