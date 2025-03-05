@@ -22,7 +22,7 @@ async function run(app) {
 
     // collection
     const collection = TenthDB.collection("collection");
-    const watchlist = TenthDB.collection("watchlist")
+    const watchlist = TenthDB.collection("watchlist");
 
     // insert a data
     app.post("/addreview", async (req, res) => {
@@ -31,13 +31,25 @@ async function run(app) {
       res.send(result);
     });
 
-    // insert a watchlist data 
-    app.post('/addwatchlist',async(req,res)=>{
-      const obj = req.body
-      console.log(obj)
-      // const result = await watchlist.insertOne(obj)
-      // res.send(result)
-    })
+    // insert a watchlist data
+    app.post("/addwatchlist", async (req, res) => {
+      const full_object = req.body;
+      const { id, object } = full_object;
+      const { email } = object;
+      const { _id, ...destructuredObject } = object;
+      const existingProduct = await watchlist.findOne({ productId: id, email });
+      if (existingProduct) {
+        return res
+          .status(400)
+          .json({ acknowledged: false, message: "Item already in watchlist" });
+      }
+      const newWatchlistItem = { productId: id };
+      const result = await watchlist.insertOne({
+        productId: id,
+        ...destructuredObject,
+      });
+      res.send(result);
+    });
 
     // get all game data
     app.get("/reviews", async (req, res) => {
@@ -54,7 +66,7 @@ async function run(app) {
       res.send(result);
     });
 
-    // get data by email 
+    // get data by email
     app.get("/myreviews", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
@@ -63,14 +75,14 @@ async function run(app) {
       res.send(result);
     });
 
-    // get watchlist by email 
-    app.get('/mywatchlist',async(req,res)=>{
-      const email = req.query.email
-      const query = {email : email}
-      const cursor = watchlist.find(query)
-      const result = await cursor.toArray()
-      res.send(result)
-    })
+    // get watchlist by email
+    app.get("/mywatchlist", async (req, res) => {
+      const email = req.query.email;
+      const query = { email: email };
+      const cursor = watchlist.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     app.put("/updatereview/:id", async (req, res) => {
       const id = req.params.id;
@@ -78,15 +90,25 @@ async function run(app) {
       const query = { _id: new ObjectId(id) };
       const update = { $set: obj };
       const options = { upsert: true };
-      const result = await collection.updateOne(query,update,options)
-      res.send(result)
+      const result = await collection.updateOne(query, update, options);
+      res.send(result);
     });
-
-    delete app.delete("/delete/:id", async (req, res) => {
+     
+    // delete from my review 
+    app.delete("/delete/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
 
       const result = await collection.deleteOne(query);
+      res.send(result);
+    });
+
+    // delete from wishlist 
+    app.delete("/deletewish/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+
+      const result = await watchlist.deleteOne(query);
       res.send(result);
     });
 
