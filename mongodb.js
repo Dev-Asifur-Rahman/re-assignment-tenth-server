@@ -34,19 +34,20 @@ async function run(app) {
     // insert a watchlist data
     app.post("/addwatchlist", async (req, res) => {
       const full_object = req.body;
+      const mail = req.query.mail
       const { id, object } = full_object;
-      const { email } = object;
-      const { _id, ...destructuredObject } = object;
-      const existingProduct = await watchlist.findOne({ productId: id, email });
+      const { _id,email, ...destructuredObject } = object;
+      const existingProduct = await watchlist.findOne({ productId: id, mail });
       if (existingProduct) {
         return res
           .status(400)
           .json({ acknowledged: false, message: "Item already in watchlist" });
       }
-      const newWatchlistItem = { productId: id };
+
       const result = await watchlist.insertOne({
         productId: id,
         ...destructuredObject,
+        mail
       });
       res.send(result);
     });
@@ -78,7 +79,7 @@ async function run(app) {
     // get watchlist by email
     app.get("/mywatchlist", async (req, res) => {
       const email = req.query.email;
-      const query = { email: email };
+      const query = { mail: email };
       const cursor = watchlist.find(query);
       const result = await cursor.toArray();
       res.send(result);
